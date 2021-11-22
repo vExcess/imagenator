@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <title>Grayscale Image Capture</title>
   <link rel="shortcut icon" type="image/jpg" href="https://cdn.kastatic.org/images/avatars/svg/old-spice-man-blue.svg"/>
-  
   <style>
     body {
       background-color: white;
@@ -95,8 +94,13 @@
     <h1 style="margin-bottom: -15px;">Imagenator 2</h1>
     <p>Created By: <a href="https://www.khanacademy.org/profile/VXS" target="_blank" style="margin-top: 0px;">VEXCESS</a></p>
 
-    <br>
+    <!-- hitwebcounter Code START -->
+    <a href="https://www.hitwebcounter.com" target="_blank">
+    <img width="100" height="30" src="https://hitwebcounter.com/counter/counter.php?page=7900412&style=0005&nbdigits=5&type=page&initCount=0" title="Free Counter" Alt="web counter"   border="0" /></a>
+    <span style="position: relative; top: -8px;">Visits</span>
 
+    <br><br>
+      
     <div style="background-color: rgb(250, 250, 250); padding: 10px; border-radius: 5px; border: 2px solid black;">
       <input id="imgInput" type="file" accept="image/*"/>
 
@@ -545,7 +549,9 @@ function handleFile(e) {
       for ( var i = 0; i < page.length; i++) {
         page[i].style.display = 'none';
       }
+      
       page[index-1].style.display = 'block';
+      
       window.scroll(0, 0);
     }
     changePage(1);
