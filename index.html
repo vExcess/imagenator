@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>Grayscale Image Capture</title>
   <link rel="shortcut icon" type="image/jpg" href="https://cdn.kastatic.org/images/avatars/svg/old-spice-man-blue.svg"/>
+  
   <style>
     body {
       background-color: white;
@@ -544,9 +545,7 @@ function handleFile(e) {
       for ( var i = 0; i < page.length; i++) {
         page[i].style.display = 'none';
       }
-      
       page[index-1].style.display = 'block';
-      
       window.scroll(0, 0);
     }
     changePage(1);
