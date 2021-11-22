@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Grayscale Image Capture</title>
+  <link rel="shortcut icon" type="image/jpg" href="https://cdn.kastatic.org/images/avatars/svg/old-spice-man-blue.svg"/>
+  <style>
+    body {
+      background-color: white;
+      font-family: "Trebuchet MS", sans-serif;
+      font-size: 16px;
+      padding: 8px;
+      z-index: 0;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    
+    #navTool {
+      position: fixed;
+      margin: 0px;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      padding: 15px 0px;
+      background-color: rgb(10, 42, 102);
+      z-index: 1;
+      border-bottom: 2px solid rgb(84, 106, 148);
+      font-size: 17px;
+      color: white;
+      text-decoration: none;
+      padding: 16px 10px;
+    }
+    #navTool a {
+      color: white;
+      text-decoration: none;
+      padding: 16px 20px;
+    }
+    #navTool a:hover {
+      background-color: rgb(0, 24, 69);
+    }
+
+    .page {
+      margin-top: 60px;
+      animation: fadeIn 0.2s linear;
+    }
+
+    input {
+      display: block;
+    }
+
+    .slider {
+      width: 600px;
+      height: 15px;
+      border-radius: 5px;  
+      background: #d3d3d3;
+      outline: none;
+      opacity: 0.7;
+      -webkit-transition: .2s;
+      transition: opacity .2s;
+    }
+
+    #resultsContainer {
+      position: fixed;
+      z-index: -1000;
+      padding: 8px;
+      background-color: black;
+      color:rgb(204, 204, 204);
+      font-family: monospace;
+      font-size: 12px;
+      width: 800px;
+      height: 600px;
+      overflow: scroll;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- NAV TOOL -->
+  <div id = "navTool">
+    <a href = "javascript:changePage(1);">Imagenator</a>
+    <a href = "javascript:changePage(2);">About</a>
+    <svg class="_1rt6g9t" aria-hidden="true" style="display: block; margin-bottom: -2px; margin-top: -23px; margin-left: auto; margin-right: auto;" width="176px" height="24px" viewBox="0 0 176 28"><path fill="white" d="M33.66,6.5A.54.54,0,0,1,34.21,6h2a.55.55,0,0,1,.55.55v6.2l5.79-6.52A.53.53,0,0,1,43,6h2.3a.48.48,0,0,1,.36.82l-6,6.75,6.43,7.69a.51.51,0,0,1-.41.81h-2.5a.55.55,0,0,1-.42-.16l-6-7.4v7a.56.56,0,0,1-.55.56h-2a.55.55,0,0,1-.55-.56Z"></path><path fill="white" d="M47.78,6.45a.54.54,0,0,1,.5-.5h1.86a.52.52,0,0,1,.51.5v5.63a4.07,4.07,0,0,1,2.7-.9c3.38,0,4.3,2.34,4.3,5v5.32a.53.53,0,0,1-.51.51H55.28a.51.51,0,0,1-.5-.51V16.16c0-1.47-.67-2.36-1.93-2.36a2.18,2.18,0,0,0-2.2,1.86v5.85c0,.3-.14.51-.56.51H48.28a.52.52,0,0,1-.5-.51Z"></path><path fill="white" d="M63.48,15.31a7.7,7.7,0,0,1,2,.3c0-1.35-.34-2-1.47-2a13.49,13.49,0,0,0-3,.39c-.35.12-.55-.13-.6-.45l-.23-1.2a.48.48,0,0,1,.34-.64,13.49,13.49,0,0,1,3.63-.53c3.31,0,4,1.72,4,4.62v5.71a.51.51,0,0,1-.51.51h-.78c-.18,0-.32-.07-.46-.37l-.3-.71a4.66,4.66,0,0,1-3.33,1.33,3.38,3.38,0,0,1-3.58-3.63C59.25,16.76,60.79,15.31,63.48,15.31Zm.07,4.82A2.27,2.27,0,0,0,65.45,19V17.45a4.23,4.23,0,0,0-1.56-.32c-1.22,0-1.88.57-1.88,1.51A1.4,1.4,0,0,0,63.55,20.13Z"></path><path fill="white" d="M70.59,11.92a.51.51,0,0,1,.51-.51H72a.42.42,0,0,1,.44.32l.39,1a4.26,4.26,0,0,1,3.42-1.54c3.37,0,4.24,2.27,4.24,4.84v5.49A.52.52,0,0,1,80,22H78.1a.51.51,0,0,1-.51-.51V16c0-1.37-.55-2.22-1.83-2.22a2.34,2.34,0,0,0-2.3,1.65v6.06c0,.39-.16.51-.66.51H71.1a.53.53,0,0,1-.51-.51Z"></path><path fill="white" d="M85.89,21.42,93,6a.4.4,0,0,1,.39-.25h.23A.39.39,0,0,1,94,6l7.07,15.45a.41.41,0,0,1-.39.6h-2a.66.66,0,0,1-.67-.46l-1.12-2.48H90.07l-1.13,2.48a.69.69,0,0,1-.66.46h-2A.4.4,0,0,1,85.89,21.42Zm9.91-4.89-2.29-5.05h-.07l-2.25,5.05Z"></path><path fill="white" d="M107,11.18A5.24,5.24,0,0,1,111,13c.23.23.12.53-.11.76l-1,1.06c-.23.25-.48.13-.69-.07a2.84,2.84,0,0,0-2.11-.92,2.78,2.78,0,0,0-2.8,2.91,2.77,2.77,0,0,0,2.78,2.94,2.81,2.81,0,0,0,2.25-1.17.5.5,0,0,1,.66-.07l1,.87c.25.23.37.49.18.76a4.75,4.75,0,0,1-4.2,2.23,5.55,5.55,0,1,1,0-11.09Z"></path><path fill="white" d="M116.83,15.31a7.82,7.82,0,0,1,2,.3c0-1.35-.35-2-1.47-2a13.5,13.5,0,0,0-3,.39c-.34.12-.55-.13-.59-.45l-.23-1.2a.48.48,0,0,1,.34-.64,13.49,13.49,0,0,1,3.63-.53c3.3,0,4,1.72,4,4.62v5.71a.51.51,0,0,1-.5.51h-.78c-.19,0-.32-.07-.46-.37l-.3-.71a4.68,4.68,0,0,1-3.33,1.33,3.38,3.38,0,0,1-3.58-3.63C112.61,16.76,114.15,15.31,116.83,15.31Zm.07,4.82A2.29,2.29,0,0,0,118.81,19V17.45a4.23,4.23,0,0,0-1.56-.32c-1.22,0-1.88.57-1.88,1.51A1.39,1.39,0,0,0,116.9,20.13Z"></path><path fill="white" d="M128.62,11.18a7.67,7.67,0,0,1,2.55.44V6.45a.54.54,0,0,1,.5-.5h1.86a.52.52,0,0,1,.51.5V21.51a.51.51,0,0,1-.51.51h-.85c-.25,0-.41-.21-.5-.51l-.28-.83a4.55,4.55,0,0,1-3.46,1.59c-2.9,0-5.08-2.34-5.08-5.56A5.21,5.21,0,0,1,128.62,11.18Zm2.55,3.22a4.18,4.18,0,0,0-2.21-.6,2.68,2.68,0,0,0-2.64,2.91c0,1.5.85,2.94,2.51,2.94a2.43,2.43,0,0,0,2.34-1.47Z"></path><path fill="white" d="M141.22,11.18a4.75,4.75,0,0,1,4.87,4.91c0,.16,0,.53-.05.69a.53.53,0,0,1-.5.48h-6.8a2.55,2.55,0,0,0,2.64,2.46,3.49,3.49,0,0,0,2.27-.78c.26-.21.53-.23.69,0l.9,1.19a.45.45,0,0,1-.05.69,6,6,0,0,1-3.95,1.45,5.37,5.37,0,0,1-5.37-5.56A5.37,5.37,0,0,1,141.22,11.18Zm2,4.2a1.94,1.94,0,0,0-2-1.83,2.11,2.11,0,0,0-2.25,1.83Z"></path><path fill="white" d="M147.79,11.92a.51.51,0,0,1,.5-.51h.83a.4.4,0,0,1,.43.3l.39,1a4,4,0,0,1,3.24-1.54,3.61,3.61,0,0,1,3.17,1.61,4.53,4.53,0,0,1,3.42-1.61c3.39,0,4.2,2.16,4.2,4.91v5.42a.52.52,0,0,1-.53.51H161.6a.51.51,0,0,1-.5-.51V16c0-1.37-.51-2.22-1.84-2.22a2,2,0,0,0-2,1.1s0,.53,0,1v5.6a.52.52,0,0,1-.5.51H155a.5.5,0,0,1-.51-.51V16c0-1.37-.39-2.22-1.74-2.22a2.1,2.1,0,0,0-2,1.65v6.06a.52.52,0,0,1-.5.51h-1.86a.52.52,0,0,1-.5-.51Z"></path><path fill="white" d="M165.07,12.1a.47.47,0,0,1,.46-.69h2.2a.42.42,0,0,1,.44.3l1.9,6.33h.05l2.41-6.33c.16-.28.34-.3.67-.3h2a.47.47,0,0,1,.46.69l-6.25,15.06a.53.53,0,0,1-.46.32h-2.2a.48.48,0,0,1-.46-.71l2.13-5.37Z"></path><path fill="#14bf96" d="M2.31,5.8A3.56,3.56,0,0,0,.66,8.6V19.4a3.56,3.56,0,0,0,1.65,2.8L12,27.62a3.75,3.75,0,0,0,3.3,0L25,22.2a3.56,3.56,0,0,0,1.65-2.8V8.6A3.56,3.56,0,0,0,25,5.8L15.31.38a3.75,3.75,0,0,0-3.3,0Z"></path><path fill="#ffffff" d="M23.61,11.32c-5.38,0-9.4,4.46-9.4,9.93v.23H13.13v-.23c0-5.47-4-9.91-9.42-9.93,0,.34,0,.69,0,1a9.91,9.91,0,0,0,6.4,9.32,10.47,10.47,0,0,0,3.59.64,10.64,10.64,0,0,0,3.62-.64,9.92,9.92,0,0,0,6.39-9.32C23.66,12,23.64,11.66,23.61,11.32Z"></path><circle fill="#ffffff" cx="13.66" cy="8.74" r="3"></circle></svg>
+  </div>
+
+  <!-- IMAGENATOR PAGE -->
+  <div class="page">
+    <h1 style="margin-bottom: -15px;">Imagenator 2</h1>
+    <p>Created By: <a href="https://www.khanacademy.org/profile/VXS" target="_blank" style="margin-top: 0px;">VEXCESS</a></p>
+
+    <br>
+
+    <div style="background-color: rgb(250, 250, 250); padding: 10px; border-radius: 5px; border: 2px solid black;">
+      <input id="imgInput" type="file" accept="image/*"/>
+
+      <br>
+
+      <span id="sizeSliderVal">Image Size: </span>
+      <input type="range" min="5" max="600" value="200" class="slider" id="sizeSlider">
+
+      <br>
+
+      <span id="colorReductionSliderVal">Color Reduction: </span>
+      <input type="range" min="1" max="128" value="1" class="slider" id="colorReductionSlider">
+
+      <br>
+
+      <span>Grayscale: </span>
+      <input type="checkbox" id="grayscaleCheck" style="width: 14px; height: 14px; display: inline; transform: translate(0, 2px);">
+
+      <br><br>
+
+      <span id="fileSize">File Size: </span>
+
+      <br><br>
+      
+      <button id="printButton">Print Data</button>
+    </div>
+
+    <div id="resultsContainer">
+      <div style="margin: -8px; width: 800px; background-color: rgb(25, 25, 25); position: fixed;">
+        <button id="closeDataButton" style="margin: 4px; background-color: rgb(50, 50, 50); color: white;">Close</button>
+      </div>
+      
+      <br><br>
+      <div id="results"></div>
+    </div>
+
+    <br>
+
+    <!-- application/javascript -->
+    <script id="PJS_code" type="data" data-width="600" data-height="600">
+var img = null;
+var newImg = null;
+var drawSz = 300;
+
+var updateTimer = 0;
+var updateIMG = true;
+
+var output = "";
+var nonCompressedOutput = [];
+
+var imageFile = document.getElementById('imgInput');
+imageFile.addEventListener('change', handleFile);
+
+var sizeSlider = document.getElementById("sizeSlider");
+var sizeSliderVal = document.getElementById("sizeSliderVal");
+sizeSlider.oninput = function () {
+  sizeSliderVal.innerHTML = "Image Size: " + sizeSlider.value;
+  updateTimer = 1;
+  updateIMG = true;
+};
+
+var colorReductionSlider = document.getElementById("colorReductionSlider");
+var colorReductionSliderVal = document.getElementById("colorReductionSliderVal");
+colorReductionSlider.oninput = function () {
+  colorReductionSliderVal.innerHTML = "Color Reduction: " + colorReductionSlider.value;
+  updateTimer = 1;
+  updateIMG = true;
+};
+
+var grayscaleCheck = document.getElementById("grayscaleCheck");
+grayscaleCheck.onclick = function() {
+  updateTimer = 1;
+  updateIMG = true;
+};
+
+var fileSize = document.getElementById("fileSize");
+
+var resultsContainer = document.getElementById("resultsContainer");
+var results = document.getElementById("results");
+
+var printButton = document.getElementById("printButton");
+printButton.onclick = function () {
+  results.innerText = output;
+  resultsContainer.style.zIndex = 1000;
+  resultsContainer.style.display = "block";
+  resultsContainer.style.left = ~~(window.innerWidth / 2 - 400) + "px";
+  resultsContainer.style.top = ~~(window.innerHeight / 2 - 300) + "px";
+};
+
+var closeDataButton = document.getElementById("closeDataButton");
+closeDataButton.onclick = function () {
+  results.innerText = "";
+  resultsContainer.style.zIndex = -1000;
+  resultsContainer.style.display = "none";
+};
+
+var base185 = {
+  codeKey: " !#$%&'()*+-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{}~¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ",
+  encode: function(num) {
+    var placeValues = 0;
+    while (pow(this.codeKey.length, placeValues) <= num + 1) {
+      placeValues++;
+    }
+
+    var encoded = "";
+    for (var i = placeValues; i > 0; i--) {
+      var factor = pow(this.codeKey.length, i - 1);
+      encoded += this.codeKey.charAt(floor(num / factor));
+      num -= floor(num / factor) * factor;
+    }
+
+    return encoded;
+  },
+};
+
+var vexIMG = {
+  capture: function (x, y, w, h, compressionFactor, grayScale) {
+    var img = get(x, y, w, h);
+    var p = img.imageData.data;
+    
+    var data = "";
+    nonCompressedOutput = [];
+    
+    if (!compressionFactor) {
+      compressionFactor = 1;
+    }
+    compressionFactor += 2;
+    
+    // GRAYSCALE
+    if (grayScale) {
+      var lastAvg = 0;
+      
+      var strAvg = "";
+      var nonCompStrAvg = [];
+      
+      for(var i = 0; i < p.length; i += 4){
+        var diffAvg = ~~((p[i] + p[i+1] + p[i+2]) / 3 / compressionFactor) - lastAvg;
+        
+        lastAvg += diffAvg;
+        
+        strAvg += base185.encode(diffAvg + 85);
+        nonCompStrAvg.push(diffAvg);
+      }
+      
+      data = base185.encode(w) + "," + base185.encode(h) + "," + base185.encode(compressionFactor) + "," + strAvg;
+      nonCompressedOutput = [w, h, compressionFactor, nonCompStrAvg];
+      
+    } 
+    // NOT GRAYSCALE
+    else {
+      var lastR = 0;
+      var lastG = 0;
+      var lastB = 0;
+      var lastA = 0;
+      
+      var strR = "";
+      var strG = "";
+      var strB = "";
+      var nonCompStrR = [];
+      var nonCompStrG = [];
+      var nonCompStrB = [];
+      
+      var addAlpha = false;
+      
+      for(var i = 3; i < p.length; i += 4){
+        if (p[i] !== 255) {
+          addAlpha = true;
+          break;
+        }
+      }
+      
+      // RGBA
+      if (addAlpha) {
+        var strA = "";
+        var nonCompStrA = [];
+
+        for(var i = 0; i < p.length; i += 4){
+          var diffR = ~~(p[i] / compressionFactor) - lastR;
+          var diffG = ~~(p[i+1] / compressionFactor) - lastG;
+          var diffB = ~~(p[i+2] / compressionFactor) - lastB;
+          var diffA = ~~(p[i+3] / compressionFactor) - lastA;
+          
+          lastR += diffR;
+          lastG += diffG;
+          lastB += diffB;
+          lastA += diffA;
+          
+          strR += base185.encode(diffR + 85);
+          strG += base185.encode(diffG + 85);
+          strB += base185.encode(diffB + 85);
+          strA += base185.encode(diffA + 85);
+          nonCompStrR.push(diffR);
+          nonCompStrG.push(diffG);
+          nonCompStrB.push(diffB);
+          nonCompStrA.push(diffA);
+        }
+        
+        data = base185.encode(w) + "," + base185.encode(h) + "," + base185.encode(compressionFactor) + "," + strR + "," + strG + "," + strB + "," + strA;
+        nonCompressedOutput = [w, h, compressionFactor, nonCompStrR, nonCompStrG, nonCompStrB, nonCompStrA];
+        
+      }
+      // RGB
+      else {
+        for(var i = 0; i < p.length; i += 4){
+          var diffR = ~~(p[i] / compressionFactor) - lastR;
+          var diffG = ~~(p[i+1] / compressionFactor) - lastG;
+          var diffB = ~~(p[i+2] / compressionFactor) - lastB;
+          
+          lastR += diffR;
+          lastG += diffG;
+          lastB += diffB;
+          
+          strR += base185.encode(diffR + 85);
+          strG += base185.encode(diffG + 85);
+          strB += base185.encode(diffB + 85);
+          nonCompStrR.push(diffR);
+          nonCompStrG.push(diffG);
+          nonCompStrB.push(diffB);
+        }
+        
+        data = base185.encode(w) + "," + base185.encode(h) + "," + base185.encode(compressionFactor) + "," + strR + "," + strG + "," + strB;
+        nonCompressedOutput = [w, h, compressionFactor, nonCompStrR, nonCompStrG, nonCompStrB];
+
+      }
+    }
+    
+    // run length encode it
+    var newData = "";
+    
+    var i = 0;
+    while (i < data.length) {
+      var currChar = data.charAt(i);
+      
+      var i2 = i + 1;
+      while (data.charAt(i2) === currChar) {
+        i2++;
+      }
+      
+      if (i2 - i > 4) {
+        var len = base185.encode(i2 - i);
+        newData += "|" + currChar + len + "|";
+        
+      } else {
+        newData += data.substring(i, i2);
+      }
+      
+      i = i2;
+    }
+    
+    output = newData;
+  },
+  
+  decode: function () {
+    var splitData = nonCompressedOutput;
+    var w = nonCompressedOutput[0];
+    var h = nonCompressedOutput[1];
+    var compressionFactor = nonCompressedOutput[2];
+    
+    var img = get(0, 0, w, h);
+    var p = img.imageData.data;
+    
+    // RGB
+    if (splitData.length === 6) {
+      var currR = 0;
+      var currG = 0;
+      var currB = 0;
+      
+      var strR = nonCompressedOutput[3];
+      var strG = nonCompressedOutput[4];
+      var strB = nonCompressedOutput[5];
+      
+      for (var i = 0; i < p.length; i += 4) {
+        var pix = i / 4;
+        
+        currR += strR[pix];
+        currG += strG[pix];
+        currB += strB[pix];
+        
+        p[i] = currR * compressionFactor;
+        p[i+1] = currG * compressionFactor;
+        p[i+2] = currB * compressionFactor;
+      }
+      
+    } 
+    // RGBA
+    else if (splitData.length === 7) {
+      var currR = 0;
+      var currG = 0;
+      var currB = 0;
+      var currA = 0;
+  
+      var strR = nonCompressedOutput[3];
+      var strG = nonCompressedOutput[4];
+      var strB = nonCompressedOutput[5];
+      var strA = nonCompressedOutput[6];
+      
+      for (var i = 0; i < p.length; i += 4) {
+        var pix = i / 4;
+        
+        currR += strR[pix];
+        currG += strG[pix];
+        currB += strB[pix];
+        currA += strA[pix];
+        
+        p[i] = currR * compressionFactor;
+        p[i+1] = currG * compressionFactor;
+        p[i+2] = currB * compressionFactor;
+        p[i+3] = currA * compressionFactor;
+      }
+      
+    }
+    // GRAYSCALE
+    else if (splitData.length === 4) {
+      var currAvg = 0;
+      
+      var strAvg = nonCompressedOutput[3];
+      
+      for (var i = 0; i < p.length; i += 4) {
+        currAvg += strAvg[i / 4];
+        
+        p[i] = currAvg * compressionFactor;
+        p[i+1] = currAvg * compressionFactor;
+        p[i+2] = currAvg * compressionFactor;
+      }
+    }
+    
+    img.set(p);
+    
+    return img;
+  }
+};
+
+frameRate(2);
+draw = function () {
+  if (img && updateIMG) {
+    background(225, 225, 225);
+
+    var sz = sizeSlider.value;
+    var drawRatio = sz / img.width;
+    
+    if (img.height * drawRatio > sz) {
+      drawRatio = sz / img.height;
+    }
+
+    var w = round(img.width * drawRatio);
+    var h = round(img.height * drawRatio);
+
+    if (w > img.width || h > img.height) {
+      w = img.width;
+      h = img.height;
+    }
+
+    var x = ~~(300 - w / 2);
+    var y = ~~(300 - h / 2);
+
+    if (updateTimer === 1) {
+      image(img, x, y, w, h);
+      vexIMG.capture(x, y, w, h, colorReductionSlider.value, grayscaleCheck.checked);
+      fileSize.innerHTML = "File Size: " + round(output.length / 1024) + "KB";
+      if (newImg) {
+        image(newImg, x, y, w, h);
+      }
+    }
+    else if (output.length > 1 && updateTimer === 2) {
+      newImg = vexIMG.decode();
+      image(newImg, x, y);
+    }
+
+    if (updateTimer > 0) {
+      updateTimer++;
+    }
+
+    if (updateTimer === 3) {
+      updateTimer = 0;
+      updateIMG = false;
+    }
+
+  }
+};
+
+function handleFile(e) {
+  var ctx = document.getElementById('pjs-canvas').getContext('2d');
+
+  var myImage = new Image;
+  myImage.src = URL.createObjectURL(e.target.files[0]);
+  myImage.onload = function() {
+    var drawRatio = 600 / myImage.width;
+    
+    if (myImage.height * drawRatio > 600) {
+      drawRatio = 600 / myImage.height;
+    }
+
+    var drawW = myImage.width * drawRatio;
+    var drawH = myImage.height * drawRatio;
+
+    if (drawW > myImage.width) {
+      drawW = myImage.width;
+    }
+    if (drawH > myImage.height) {
+      drawH = myImage.height;
+    }
+
+    background(0, 0, 0, 0);
+    ctx.drawImage(myImage, 0, 0, drawW, drawH);
+
+    img = get(0, 0, drawW, drawH);
+
+    background(225, 225, 255);
+
+    sizeSliderVal.innerHTML = "Image Size: " + sizeSlider.value;
+    colorReductionSliderVal.innerHTML = "Color Reduction: " + colorReductionSlider.value;
+
+    var sz = sizeSlider.value;
+    var drawRatio = sz / img.width;
+    
+    if (img.height * drawRatio > sz) {
+      drawRatio = sz / img.height;
+    }
+
+    var w = round(img.width * drawRatio);
+    var h = round(img.height * drawRatio);
+
+    if (w > img.width || h > img.height) {
+      w = img.width;
+      h = img.height;
+    }
+
+    image(img, ~~(300 - w / 2), ~~(300 - h / 2), w, h);
+  }
+}
+    </script>
+  
+    <script src="https://cdn.jsdelivr.net/gh/vExcess/library_files@main/runPJS_offKA.js"></script>
+
+  </div>
+
+  <!-- ABOUT PAGE -->
+  <div class="page">
+    Ad aspera ad astra
+  </div>
+
+  <!-- CHANGE PAGE CODE -->
+  <script>
+    var page = document.getElementsByClassName('page');
+    function changePage(index) {
+      for ( var i = 0; i < page.length; i++) {
+        page[i].style.display = 'none';
+      }
+      
+      page[index-1].style.display = 'block';
+      
+      window.scroll(0, 0);
+    }
+    changePage(1);
+  </script>
+
+</body>
+</html>
