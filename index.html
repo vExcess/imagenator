@@ -452,7 +452,6 @@ frameRate(2);
 draw = function () {
   if (img && updateIMG) {
     background(225, 225, 225);
-    background(0, 0, 0, 0);
 
     var sz = parseInt(sizeSlider.value);
     var drawRatio = sz / img.width;
@@ -473,6 +472,7 @@ draw = function () {
     var y = ~~(300 - h / 2);
 
     if (updateTimer === 1) {
+      background(0, 0, 0, 0);
       image(img, x, y, w, h);
       vexIMG.capture(x, y, w, h, parseInt(colorReductionSlider.value), grayscaleCheck.checked);
       fileSize.innerHTML = "File Size: " + round(output.length / 1024) + "KB";
