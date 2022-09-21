@@ -96,6 +96,15 @@
     <a href="https://www.hitwebcounter.com" target="_blank">
     <img width="100" height="30" src="https://hitwebcounter.com/counter/counter.php?page=7900412&style=0005&nbdigits=5&type=page&initCount=0" title="Free Counter" Alt="web counter"   border="0" /></a>
     <span style="position: relative; top: -8px;">Visits</span>
+    
+    <p>
+        I haven't worked on my image file format in a long time so it's not as good as it could be. 
+        While this is still better than Bob Lyon's imagenator, you can get even better image compression by encoding popular image file formats (PNG, JPEG) to base64 and then use <a href="https://github.com/vExcess/libraries/blob/main/ImageDecoder.js">my image decoding library</a> to convert the base64 into pixel data.
+        Definitely use base64 + ImageDecoder.js library if you are working in KA's HTML environment.
+        If you are working in the PJS environment it's still possible to use base64 + ImageDecoder.js but it's a bit of extra work.
+        My advice if you are working in the PJS environment: don't, switch to HTML
+        And if you want to run PJS 
+    </p>
 
     <br><br>
       
@@ -552,7 +561,7 @@ function handleFile(e) {
 }
     </script>
   
-    <script src="https://cdn.jsdelivr.net/gh/vExcess/library_files@main/runPJS_offKA.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/vExcess/libraries@main/runPJS.js"></script>
 
   </div>
 
