@@ -507,7 +507,7 @@ draw = function () {
 };
 
 function handleFile(e) {
-  var ctx = document.getElementById('pjs-canvas').getContext('2d');
+  var ctx = window.pjsEnvironments[0].canvas.getContext('2d');
 
   var myImage = new Image;
   myImage.src = URL.createObjectURL(e.target.files[0]);
