@@ -1,573 +1,86 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Grayscale Image Capture</title>
-  <link rel="shortcut icon" type="image/jpg" href="https://cdn.kastatic.org/images/avatars/svg/old-spice-man-blue.svg"/>
-  <style>
-    body {
-      background-color: white;
-      font-family: "Trebuchet MS", sans-serif;
-      font-size: 16px;
-      padding: 8px;
-      z-index: 0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imagenator</title>
 
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-    
-    #navTool {
-      position: fixed;
-      margin: 0px;
-      top: 0px;
-      left: 0px;
-      right: 0px;
-      padding: 15px 0px;
-      background-color: rgb(10, 42, 102);
-      z-index: 1;
-      border-bottom: 2px solid rgb(84, 106, 148);
-      font-size: 17px;
-      color: white;
-      text-decoration: none;
-      padding: 16px 10px;
-    }
-    #navTool a {
-      color: white;
-      text-decoration: none;
-      padding: 16px 20px;
-    }
-    #navTool a:hover {
-      background-color: rgb(0, 24, 69);
-    }
+    <link rel="shortcut icon" type="image/jpg" href="https://cdn.kastatic.org/images/avatars/svg/old-spice-man-blue.svg"/>
+    <link rel="stylesheet" href="./style.css">
 
-    .page {
-      margin-top: 60px;
-      animation: fadeIn 0.2s linear;
-    }
+    <script src="./lib/drawlite.js"></script>
+    <script src="./lib/base64.js"></script>
 
-    input {
-      display: block;
-    }
-
-    .slider {
-      width: 99%;
-      height: 15px;
-      border-radius: 5px;  
-      background: #d3d3d3;
-      outline: none;
-      opacity: 0.7;
-      -webkit-transition: .2s;
-      transition: opacity .2s;
-    }
-
-    #resultsContainer {
-      position: fixed;
-      z-index: -1000;
-      padding: 8px;
-      background-color: black;
-      color:rgb(204, 204, 204);
-      font-family: monospace;
-      font-size: 12px;
-      width: 800px;
-      height: 600px;
-      overflow: scroll;
-      display: none;
-    }
-  </style>
+    <script src="./vexcess/imagenator.js"></script>
+    <script src="./bob-lyon/imagenator.js"></script>
+    <script src="./qoi/imagenator.js"></script>
 </head>
 <body>
-  <!-- NAV TOOL -->
-  <div id = "navTool">
-    <a href="https://vexcess.github.io/" target="_self" style='font-family: "Trebuchet MS", sans-serif;'>VEXCESS.io</a>
-  </div>
+    <div class="container">
+        <div class="controls" style="width: 50%;">
+            <h1 style="margin-bottom: 2px;">Imagenator</h1>
+            <div>Created By: <a href="https://www.khanacademy.org/profile/VXS" target="_blank">VEXCESS</a></div>
+            <br>
 
-  <!-- IMAGENATOR PAGE -->
-  <div class="page">
-    <h1 style="margin-bottom: -15px;">Imagenator 2</h1>
-    <p>Created By: <a href="https://www.khanacademy.org/profile/VXS" target="_blank" style="margin-top: 0px;">VEXCESS</a></p>
+            <div class="control-group">
+                <label>Upload Image</label>
+                <input type="file" id="upload" accept="image/*">
+            </div>
 
-    <!-- hitwebcounter Code START -->
-    <a href="https://www.hitwebcounter.com" target="_blank">
-    <img width="100" height="30" src="https://hitwebcounter.com/counter/counter.php?page=7900412&style=0005&nbdigits=5&type=page&initCount=0" title="Free Counter" Alt="web counter"   border="0" /></a>
-    <span style="position: relative; top: -8px;">Visits</span>
-    
-    <p>
-        I haven't worked on my image file format in a long time so it's not as good as it could be. 
-        While this is still better than Bob Lyon's imagenator, you can get even better image compression by encoding popular image file formats (PNG, JPEG) to base64 and then use <a href="https://github.com/vExcess/libraries/blob/main/ImageDecoder.js">my image decoding library</a> to convert the base64 into pixel data.
-        Definitely use base64 + ImageDecoder.js library if you are working in KA's HTML environment.
-        If you are working in the PJS environment it's still possible to use base64 + ImageDecoder.js but it's a bit of extra work.
-        My advice if you are working in the PJS environment: don't, switch to HTML
-        And if you want to run PJS then use <a href="https://github.com/vExcess/libraries/blob/main/runPJS.js">my library for running PJS code</a>
-    </p>
+            <div class="control-group">
+                <label>Image Size</label>
+                <input type="number" id="image-size" value="400">
+            </div>
 
-    <br><br>
-      
-    <div style="background-color: rgb(250, 250, 250); padding: 10px; border-radius: 5px; border: 2px solid black;">
-      <input id="imgInput" type="file" accept="image/*"/>
+            <div class="control-group">
+                <label>Compression Level (0.0 - 1.0)</label>
+                <input type="range" id="compression" min="0.0" max="1.0" step="0.1" value="0.0">
+                <span id="compression-val">0.0</span>
+            </div>
 
-      <br>
+            <div class="control-group">
+                <input type="checkbox" id="grayscale">
+                <label style="transform: translateY(-1px); display: inline-block;">Grayscale</label>
+            </div>
 
-      <span id="sizeSliderVal">Image Size: </span>
-      <input type="range" min="5" max="600" value="200" class="slider" id="sizeSlider">
+            <div class="control-group">
+                <label>Output Format</label>
+                <div class="radio-group">
+                    <input class="output-option" type="radio" name="format" id="bob-lyon-imagenator" value="bob-lyon-imagenator">
+                    <label for="bob-lyon-imagenator">Bob Lyon Imagenator</label>
+                    
+                    <input class="output-option" type="radio" name="format" id="vexcess-imagenator" value="vexcess-imagenator" checked>
+                    <label for="vexcess-imagenator">VExcess Imagenator</label>
+                    
+                    <input class="output-option" type="radio" name="format" id="qoi" value="qoi">
+                    <label for="qoi">QOI</label>
+                </div>
+            </div>
 
-      <br>
+            <div class="control-group">
+                <label>Output Size:</label>
+                <span id="output-size-val">...</span>
+            </div>
 
-      <span id="colorReductionSliderVal">Color Reduction: </span>
-      <input type="range" min="1" max="128" value="1" class="slider" id="colorReductionSlider">
+            <button class="print-btn" id="print-btn">Print Code</button>
+        </div>
 
-      <br>
-
-      <span>Grayscale: </span>
-      <input type="checkbox" id="grayscaleCheck" style="width: 14px; height: 14px; display: inline; transform: translate(0, 2px);">
-
-      <br><br>
-
-      <span id="fileSize">File Size: </span>
-
-      <br><br>
-      
-      <button id="printButton">Print Code</button>
+        <div id="preview-container">
+            <canvas id="canvas"></canvas>
+        </div>
     </div>
 
-    <div id="resultsContainer">
-      <div style="margin: -8px; width: 800px; background-color: rgb(25, 25, 25); position: fixed;">
-        <button id="closeDataButton" style="margin: 4px; background-color: rgb(50, 50, 50); color: white;">Close</button>
-        <button id="copyDataButton" style="margin: 4px; background-color: rgb(50, 50, 50); color: white;">Copy Data</button>
-      </div>
-      
-      <br><br>
-      <div id="results"></div>
+    <div id="results-container">
+        <div style="margin: -8px; width: 800px; background-color: rgb(25, 25, 25); position: fixed;">
+            <button id="closeDataButton" class="results-btn">Close</button>
+            <button id="copyDataButton" class="results-btn">Copy Data</button>
+        </div>
+        
+        <br><br>
+        <div id="results"></div>
     </div>
 
-    <br>
-
-    <!-- application/javascript -->
-    <script class="pjs-src" type="data" data-width="600" data-height="600">
-var img = null;
-var newImg = null;
-
-var updateTimer = 0;
-var updateIMG = true;
-
-var output = "";
-var nonCompressedOutput = [];
-
-var imageFile = document.getElementById('imgInput');
-imageFile.addEventListener('change', handleFile);
-
-var sizeSlider = document.getElementById("sizeSlider");
-var sizeSliderVal = document.getElementById("sizeSliderVal");
-sizeSlider.oninput = function () {
-  sizeSliderVal.innerHTML = "Image Size: " + sizeSlider.value;
-  updateTimer = 1;
-  updateIMG = true;
-};
-
-var colorReductionSlider = document.getElementById("colorReductionSlider");
-var colorReductionSliderVal = document.getElementById("colorReductionSliderVal");
-colorReductionSlider.oninput = function () {
-  colorReductionSliderVal.innerHTML = "Color Reduction: " + colorReductionSlider.value;
-  updateTimer = 1;
-  updateIMG = true;
-};
-
-var grayscaleCheck = document.getElementById("grayscaleCheck");
-grayscaleCheck.onclick = function() {
-  updateTimer = 1;
-  updateIMG = true;
-};
-
-var fileSize = document.getElementById("fileSize");
-
-var resultsContainer = document.getElementById("resultsContainer");
-var results = document.getElementById("results");
-
-function copy_data (containerid) {
-  var range = document.createRange();
-  range.selectNode(document.getElementById(containerid)); //changed here
-  window.getSelection().removeAllRanges(); 
-  window.getSelection().addRange(range); 
-  document.execCommand("copy");
-  window.getSelection().removeAllRanges();
-  alert("data copied");
-}
-
-var libCode = `var base185={codeKey:" !#$%&'()*+-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_\`abcdefghijklmnopqrstuvwxyz{}~¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ",decode:function(num){var decoded=0;for(var i =num.length;i>0;i--){var value=pow(this.codeKey.length,i-1).toString();var value2=this.codeKey.indexOf(num.charAt(num.length-i));var value3=value*value2;decoded+=value3;}return decoded;}};var vexIMG={decode:function(imgCode){var newData="";var i=0;while (i<imgCode.length){var currChar=imgCode.charAt(i);if(currChar==="|"){var char=imgCode.charAt(i+1);var j=i+3;while(imgCode.charAt(j)!== "|"&&j<imgCode.length){j++;}var len=base185.decode(imgCode.substring(i+2,j));var seg="";for(var k=0;k<len;k++){ seg+=char;}newData+=seg;i+=j-i+1;}else{newData+=currChar;i++;}}var splitData=newData.split(",");var w=base185.decode(splitData[0]);var h=base185.decode(splitData[1]);var compressionFactor=base185.decode(splitData[2]);var img=get(0,0,w,h);var p=img;if(p.imageData){p=p.imageData;}if(p.data){p=p.data;}if(splitData.length===6){var currR=0;var currG=0;var currB=0;var strR=splitData[3].split("");var strG=splitData[4].split("");var strB=splitData[5].split("");for(var i=0;i<p.length;i+=4){var pix=i/4;currR+=base185.decode(strR[pix])-85; currG+=base185.decode(strG[pix])-85;currB+=base185.decode(strB[pix])-85;p[i]=currR*compressionFactor;p[i+1]=currG*compressionFactor;p[i+2]=currB*compressionFactor;}}else if(splitData.length===7){var currR=0;var currG=0;var currB=0;var currA=0;var strR=splitData[3].split("");var strG=splitData[4].split("");var strB=splitData[5].split("");var strA=splitData[6].split("");for (var i=0;i<p.length;i+=4){var pix=i/4;currR+=base185.decode(strR[pix])-85;currG+=base185.decode(strG[pix])-85;currB+=base185.decode(strB[pix])-85;currA+=base185.decode(strA[pix])-85;p[i]=currR*compressionFactor;p[i+1]=currG*compressionFactor;p[i+2]=currB*compressionFactor;p[i+3]=currA*compressionFactor;}}else if(splitData.length===4){var currAvg=0;var strAvg=splitData[3].split("");for(var i=0;i<p.length;i+=4){currAvg+=base185.decode(strAvg[i/4])-85;p[i]=currAvg*compressionFactor;p[i+1]=currAvg*compressionFactor;p[i+2]=currAvg*compressionFactor;}}if(img.set){img.set(p);}return img;}};`;
-
-var printButton = document.getElementById("printButton");
-printButton.onclick = function () {
-  results.innerText = "//The following comment guarantees that this program will never appear on the hot list. Do not remove it unless you are using this imagenator for a legitimate use such making sprites for a game. Generated images that appear on the hotlist and are not being used for a legitamate purpose will be flagged and taken down:\n// /cs/pro/5733417664643072\n\n" + libCode + '\n\nvar myImage = "' + output + '";\n\nmyImage = vexIMG.decode(myImage);\n\nimageMode(CENTER);\nimage(myImage, width / 2, height / 2);';
-  resultsContainer.style.zIndex = 1000;
-  resultsContainer.style.display = "block";
-  resultsContainer.style.left = ~~(window.innerWidth / 2 - 400) + "px";
-  resultsContainer.style.top = ~~(window.innerHeight / 2 - 300) + "px";
-};
-
-var closeDataButton = document.getElementById("closeDataButton");
-closeDataButton.onclick = function () {
-  results.innerText = "";
-  resultsContainer.style.zIndex = -1000;
-  resultsContainer.style.display = "none";
-};
-
-var copyDataButton = document.getElementById("copyDataButton");
-copyDataButton.onclick = function () {
-  copy_data("results");
-};
-
-var base185 = {
-  codeKey: " !#$%&'()*+-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{}~¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ",
-  encode: function(num) {
-    var placeValues = 0;
-    while (pow(this.codeKey.length, placeValues) <= num + 1) {
-      placeValues++;
-    }
-
-    var encoded = "";
-    for (var i = placeValues; i > 0; i--) {
-      var factor = pow(this.codeKey.length, i - 1);
-      encoded += this.codeKey.charAt(floor(num / factor));
-      num -= floor(num / factor) * factor;
-    }
-
-    return encoded;
-  },
-};
-
-var vexIMG = {
-  capture: function (x, y, w, h, compressionFactor, grayScale) {
-    var img = get(x, y, w, h);
-    var p = img.imageData.data;
-    
-    var data = "";
-    nonCompressedOutput = [];
-    
-    if (!compressionFactor) {
-      compressionFactor = 1;
-    }
-    compressionFactor += 2;
-    
-    // GRAYSCALE
-    if (grayScale) {
-      var lastAvg = 0;
-      
-      var strAvg = "";
-      var nonCompStrAvg = [];
-      
-      for(var i = 0; i < p.length; i += 4){
-        var diffAvg = ~~((p[i] + p[i+1] + p[i+2]) / 3 / compressionFactor) - lastAvg;
-        
-        lastAvg += diffAvg;
-        
-        strAvg += base185.encode(diffAvg + 85);
-        nonCompStrAvg.push(diffAvg);
-      }
-      
-      data = base185.encode(w) + "," + base185.encode(h) + "," + base185.encode(compressionFactor) + "," + strAvg;
-      nonCompressedOutput = [w, h, compressionFactor, nonCompStrAvg];
-      
-    } 
-    // NOT GRAYSCALE
-    else {
-      var lastR = 0;
-      var lastG = 0;
-      var lastB = 0;
-      var lastA = 0;
-      
-      var strR = "";
-      var strG = "";
-      var strB = "";
-      var nonCompStrR = [];
-      var nonCompStrG = [];
-      var nonCompStrB = [];
-      
-      var addAlpha = false;
-      
-      for(var i = 3; i < p.length; i += 4){
-        if (p[i] !== 255) {
-          addAlpha = true;
-          break;
-        }
-      }
-      
-      // RGBA
-      if (addAlpha) {
-        var strA = "";
-        var nonCompStrA = [];
-
-        for(var i = 0; i < p.length; i += 4){
-          var diffR = ~~(p[i] / compressionFactor) - lastR;
-          var diffG = ~~(p[i+1] / compressionFactor) - lastG;
-          var diffB = ~~(p[i+2] / compressionFactor) - lastB;
-          var diffA = ~~(p[i+3] / compressionFactor) - lastA;
-          
-          lastR += diffR;
-          lastG += diffG;
-          lastB += diffB;
-          lastA += diffA;
-          
-          strR += base185.encode(diffR + 85);
-          strG += base185.encode(diffG + 85);
-          strB += base185.encode(diffB + 85);
-          strA += base185.encode(diffA + 85);
-          nonCompStrR.push(diffR);
-          nonCompStrG.push(diffG);
-          nonCompStrB.push(diffB);
-          nonCompStrA.push(diffA);
-        }
-        
-        data = base185.encode(w) + "," + base185.encode(h) + "," + base185.encode(compressionFactor) + "," + strR + "," + strG + "," + strB + "," + strA;
-        nonCompressedOutput = [w, h, compressionFactor, nonCompStrR, nonCompStrG, nonCompStrB, nonCompStrA];
-        
-      }
-      // RGB
-      else {
-        for(var i = 0; i < p.length; i += 4){
-          var diffR = ~~(p[i] / compressionFactor) - lastR;
-          var diffG = ~~(p[i+1] / compressionFactor) - lastG;
-          var diffB = ~~(p[i+2] / compressionFactor) - lastB;
-          
-          lastR += diffR;
-          lastG += diffG;
-          lastB += diffB;
-          
-          strR += base185.encode(diffR + 85);
-          strG += base185.encode(diffG + 85);
-          strB += base185.encode(diffB + 85);
-          nonCompStrR.push(diffR);
-          nonCompStrG.push(diffG);
-          nonCompStrB.push(diffB);
-        }
-        
-        data = base185.encode(w) + "," + base185.encode(h) + "," + base185.encode(compressionFactor) + "," + strR + "," + strG + "," + strB;
-        nonCompressedOutput = [w, h, compressionFactor, nonCompStrR, nonCompStrG, nonCompStrB];
-
-      }
-    }
-    
-    // run length encode it
-    var newData = "";
-    
-    var i = 0;
-    while (i < data.length) {
-      var currChar = data.charAt(i);
-      
-      var i2 = i + 1;
-      while (data.charAt(i2) === currChar) {
-        i2++;
-      }
-      
-      if (i2 - i > 4) {
-        var len = base185.encode(i2 - i);
-        newData += "|" + currChar + len + "|";
-        
-      } else {
-        newData += data.substring(i, i2);
-      }
-      
-      i = i2;
-    }
-    
-    output = newData;
-  },
-  
-  decode: function () {
-    var splitData = nonCompressedOutput;
-    var w = nonCompressedOutput[0];
-    var h = nonCompressedOutput[1];
-    var compressionFactor = nonCompressedOutput[2];
-    
-    var img = get(0, 0, w, h);
-    var p = img.imageData.data;
-    
-    // RGB
-    if (splitData.length === 6) {
-      var currR = 0;
-      var currG = 0;
-      var currB = 0;
-      
-      var strR = nonCompressedOutput[3];
-      var strG = nonCompressedOutput[4];
-      var strB = nonCompressedOutput[5];
-      
-      for (var i = 0; i < p.length; i += 4) {
-        var pix = i / 4;
-        
-        currR += strR[pix];
-        currG += strG[pix];
-        currB += strB[pix];
-        
-        p[i] = currR * compressionFactor;
-        p[i+1] = currG * compressionFactor;
-        p[i+2] = currB * compressionFactor;
-      }
-      
-    } 
-    // RGBA
-    else if (splitData.length === 7) {
-      var currR = 0;
-      var currG = 0;
-      var currB = 0;
-      var currA = 0;
-  
-      var strR = nonCompressedOutput[3];
-      var strG = nonCompressedOutput[4];
-      var strB = nonCompressedOutput[5];
-      var strA = nonCompressedOutput[6];
-      
-      for (var i = 0; i < p.length; i += 4) {
-        var pix = i / 4;
-        
-        currR += strR[pix];
-        currG += strG[pix];
-        currB += strB[pix];
-        currA += strA[pix];
-        
-        p[i] = currR * compressionFactor;
-        p[i+1] = currG * compressionFactor;
-        p[i+2] = currB * compressionFactor;
-        p[i+3] = currA * compressionFactor;
-      }
-      
-    }
-    // GRAYSCALE
-    else if (splitData.length === 4) {
-      var currAvg = 0;
-      
-      var strAvg = nonCompressedOutput[3];
-      
-      for (var i = 0; i < p.length; i += 4) {
-        currAvg += strAvg[i / 4];
-        
-        p[i] = currAvg * compressionFactor;
-        p[i+1] = currAvg * compressionFactor;
-        p[i+2] = currAvg * compressionFactor;
-      }
-    }
-    
-    img.set(p);
-    
-    return img;
-  }
-};
-
-frameRate(2);
-draw = function () {
-  if (img && updateIMG) {
-    background(225, 225, 225);
-
-    var sz = parseInt(sizeSlider.value);
-    var drawRatio = sz / img.width;
-    
-    if (img.height * drawRatio > sz) {
-      drawRatio = sz / img.height;
-    }
-
-    var w = round(img.width * drawRatio);
-    var h = round(img.height * drawRatio);
-
-    if (w > img.width || h > img.height) {
-      w = img.width;
-      h = img.height;
-    }
-
-    var x = ~~(300 - w / 2);
-    var y = ~~(300 - h / 2);
-
-    if (updateTimer === 1) {
-      background(0, 0, 0, 0);
-      image(img, x, y, w, h);
-      vexIMG.capture(x, y, w, h, parseInt(colorReductionSlider.value), grayscaleCheck.checked);
-      fileSize.innerHTML = "File Size: " + round(output.length / 1024) + "KB";
-      if (newImg) {
-        image(newImg, x, y, w, h);
-      }
-    }
-    else if (output.length > 1 && updateTimer === 2) {
-      newImg = vexIMG.decode();
-      image(newImg, x, y);
-    }
-
-    if (updateTimer > 0) {
-      updateTimer++;
-    }
-
-    if (updateTimer === 3) {
-      updateTimer = 0;
-      updateIMG = false;
-    }
-
-  }
-};
-
-function handleFile(e) {
-  var ctx = window.pjsEnvironments[0].canvas.getContext('2d');
-
-  var myImage = new Image;
-  myImage.src = URL.createObjectURL(e.target.files[0]);
-  myImage.onload = function() {
-    var drawRatio = 600 / myImage.width;
-    
-    if (myImage.height * drawRatio > 600) {
-      drawRatio = 600 / myImage.height;
-    }
-
-    var drawW = myImage.width * drawRatio;
-    var drawH = myImage.height * drawRatio;
-
-    if (drawW > myImage.width) {
-      drawW = myImage.width;
-    }
-    if (drawH > myImage.height) {
-      drawH = myImage.height;
-    }
-
-    background(0, 0, 0, 0);
-    ctx.drawImage(myImage, 0, 0, drawW, drawH);
-
-    img = get(0, 0, drawW, drawH);
-
-    background(225, 225, 255);
-
-    sizeSliderVal.innerHTML = "Image Size: " + sizeSlider.value;
-    colorReductionSliderVal.innerHTML = "Color Reduction: " + colorReductionSlider.value;
-
-    var sz = sizeSlider.value;
-    var drawRatio = sz / img.width;
-    
-    if (img.height * drawRatio > sz) {
-      drawRatio = sz / img.height;
-    }
-
-    var w = round(img.width * drawRatio);
-    var h = round(img.height * drawRatio);
-
-    if (w > img.width || h > img.height) {
-      w = img.width;
-      h = img.height;
-    }
-
-    image(img, ~~(300 - w / 2), ~~(300 - h / 2), w, h);
-
-    updateTimer = 1;
-    updateIMG = true;
-  }
-}
-    </script>
-  
-    <script src="https://cdn.jsdelivr.net/gh/vExcess/libraries@main/runPJS.js"></script>
-
-  </div>
-
-  <script>
-    window.scroll(0, 0);
-  </script>
+    <script src="./index.js"></script>
 
 </body>
 </html>
