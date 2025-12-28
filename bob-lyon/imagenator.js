@@ -135,7 +135,7 @@ inflate: function(a){if(img180.img){return img180.img;}var c=function(a){var b=0
         return Promise.resolve(imageJSONString);
     }
 
-    static decode(deflatedImage) {
+    static decode() {
         image(inflatedPJSImage, 0, 0);
         return null;
     }

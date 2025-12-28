@@ -8,6 +8,8 @@ class CodecQOIImagenator {
     base64ToPImage: function(z){var F=sq.constructor,i;z=z.split(",");z=z[z.length-1];var S=F("b64","return atob(b64)")(z),l=S.length,b=F("len","return new Uint8Array(len)")(l);for(i=0;i<l;i++){b[i]=S.charCodeAt(i);}var I=QOI.decode(b.buffer,null,null,4),PI=get(0,0,I.width,I.height);if(I&&I.data){for(i=0,l=I.data.length;i<l;i++){PI.imageData.data[i]=I.data[i];}PI.set();}return PI;}
 };`;
 
+    static encodedCached = null;
+
     static async encode(settings) {
         let colorData = settings.imageData.data;
 
@@ -192,86 +194,149 @@ class CodecQOIImagenator {
         result[p++] = 1;
 
         // return an ArrayBuffer trimmed to the correct length
-        return await Base64.Uint8ToB64(result.buffer.slice(0, p));
+        CodecQOIImagenator.encodedCached = result.buffer.slice(0, p);
+        return await Base64.Uint8ToB64(CodecQOIImagenator.encodedCached);
     }
 
     static decode() {
-        var splitData = CodecVexcessImagenator.nonCompressedOutput;
-        var w = CodecVexcessImagenator.nonCompressedOutput[0];
-        var h = CodecVexcessImagenator.nonCompressedOutput[1];
-        var compressionFactor = CodecVexcessImagenator.nonCompressedOutput[2];
+        let arrayBuffer = CodecQOIImagenator.encodedCached;
+        let byteOffset = null;
+        let byteLength = null;
+        let outputChannels = 4;
 
-        var imageData = new ImageData(w, h);
-        var p = imageData.data;
-        for (var i = 0; i < p.length; i += 4) {
-            p[i + 3] = 255;
+        if (typeof byteOffset === 'undefined' || byteOffset === null) {
+            byteOffset = 0;
         }
 
-        // RGB
-        if (splitData.length === 6) {
-            var currR = 0;
-            var currG = 0;
-            var currB = 0;
+        if (typeof byteLength === 'undefined' || byteLength === null) {
+            byteLength = arrayBuffer.byteLength - byteOffset;
+        }
 
-            var strR = CodecVexcessImagenator.nonCompressedOutput[3];
-            var strG = CodecVexcessImagenator.nonCompressedOutput[4];
-            var strB = CodecVexcessImagenator.nonCompressedOutput[5];
+        const uint8 = new Uint8Array(arrayBuffer, byteOffset, byteLength);
 
-            for (var i = 0; i < p.length; i += 4) {
-                var pix = i / 4;
+        const magic1 = uint8[0];
+        const magic2 = uint8[1];
+        const magic3 = uint8[2];
+        const magic4 = uint8[3];
 
-                currR += strR[pix];
-                currG += strG[pix];
-                currB += strB[pix];
+        const width = ((uint8[4] << 24) | (uint8[5] << 16) | (uint8[6] << 8) | uint8[7]) >>> 0;
+        const height = ((uint8[8] << 24) | (uint8[9] << 16) | (uint8[10] << 8) | uint8[11]) >>> 0;
 
-                p[i] = currR * compressionFactor;
-                p[i + 1] = currG * compressionFactor;
-                p[i + 2] = currB * compressionFactor;
+        const channels = uint8[12];
+        const colorspace = uint8[13];
+
+        if (typeof outputChannels === 'undefined' || outputChannels === null) {
+            outputChannels = channels;
+        }
+
+        if (magic1 !== 0x71 || magic2 !== 0x6F || magic3 !== 0x69 || magic4 !== 0x66) {
+            throw new Error('QOI.decode: The signature of the QOI file is invalid');
+        }
+
+        if (channels < 3 || channels > 4) {
+            throw new Error('QOI.decode: The number of channels declared in the file is invalid');
+        }
+
+        if (colorspace > 1) {
+            throw new Error('QOI.decode: The colorspace declared in the file is invalid');
+        }
+
+        if (outputChannels < 3 || outputChannels > 4) {
+            throw new Error('QOI.decode: The number of channels for the output is invalid');
+        }
+
+        const pixelLength = width * height * outputChannels;
+        const result = new Uint8Array(pixelLength);
+
+        let arrayPosition = 14;
+
+        const index = new Uint8Array(64 * 4);
+        let indexPosition = 0;
+
+        let red = 0;
+        let green = 0;
+        let blue = 0;
+        let alpha = 255;
+
+        const chunksLength = byteLength - 8;
+
+        let run = 0;
+        let pixelPosition = 0;
+
+        for (; pixelPosition < pixelLength && arrayPosition < byteLength - 4; pixelPosition += outputChannels) {
+            if (run > 0) {
+                run--;
+            } else if (arrayPosition < chunksLength) {
+                const byte1 = uint8[arrayPosition++];
+
+                if (byte1 === 0b11111110) { // QOI_OP_RGB
+                    red = uint8[arrayPosition++];
+                    green = uint8[arrayPosition++];
+                    blue = uint8[arrayPosition++];
+                } else if (byte1 === 0b11111111) { // QOI_OP_RGBA
+                    red = uint8[arrayPosition++];
+                    green = uint8[arrayPosition++];
+                    blue = uint8[arrayPosition++];
+                    alpha = uint8[arrayPosition++];
+                } else if ((byte1 & 0b11000000) === 0b00000000) { // QOI_OP_INDEX
+                    red = index[byte1 * 4];
+                    green = index[byte1 * 4 + 1];
+                    blue = index[byte1 * 4 + 2];
+                    alpha = index[byte1 * 4 + 3];
+                } else if ((byte1 & 0b11000000) === 0b01000000) { // QOI_OP_DIFF
+                    red += ((byte1 >> 4) & 0b00000011) - 2;
+                    green += ((byte1 >> 2) & 0b00000011) - 2;
+                    blue += (byte1 & 0b00000011) - 2;
+
+                    // handle wraparound
+                    red = (red + 256) % 256;
+                    green = (green + 256) % 256;
+                    blue = (blue + 256) % 256;
+                } else if ((byte1 & 0b11000000) === 0b10000000) { // QOI_OP_LUMA
+                    const byte2 = uint8[arrayPosition++];
+                    const greenDiff = (byte1 & 0b00111111) - 32;
+                    const redDiff = greenDiff + ((byte2 >> 4) & 0b00001111) - 8;
+                    const blueDiff = greenDiff + (byte2 & 0b00001111) - 8;
+
+                    // handle wraparound
+                    red = (red + redDiff + 256) % 256;
+                    green = (green + greenDiff + 256) % 256;
+                    blue = (blue + blueDiff + 256) % 256;
+                } else if ((byte1 & 0b11000000) === 0b11000000) { // QOI_OP_RUN
+                    run = byte1 & 0b00111111;
+                }
+
+                indexPosition = ((red * 3 + green * 5 + blue * 7 + alpha * 11) % 64) * 4;
+                index[indexPosition] = red;
+                index[indexPosition + 1] = green;
+                index[indexPosition + 2] = blue;
+                index[indexPosition + 3] = alpha;
             }
 
-        }
-        // RGBA
-        else if (splitData.length === 7) {
-            var currR = 0;
-            var currG = 0;
-            var currB = 0;
-            var currA = 0;
-
-            var strR = CodecVexcessImagenator.nonCompressedOutput[3];
-            var strG = CodecVexcessImagenator.nonCompressedOutput[4];
-            var strB = CodecVexcessImagenator.nonCompressedOutput[5];
-            var strA = CodecVexcessImagenator.nonCompressedOutput[6];
-
-            for (var i = 0; i < p.length; i += 4) {
-                var pix = i / 4;
-
-                currR += strR[pix];
-                currG += strG[pix];
-                currB += strB[pix];
-                currA += strA[pix];
-
-                p[i] = currR * compressionFactor;
-                p[i + 1] = currG * compressionFactor;
-                p[i + 2] = currB * compressionFactor;
-                p[i + 3] = currA * compressionFactor;
-            }
-
-        }
-        // GRAYSCALE
-        else if (splitData.length === 4) {
-            var currAvg = 0;
-
-            var strAvg = CodecVexcessImagenator.nonCompressedOutput[3];
-
-            for (var i = 0; i < p.length; i += 4) {
-                currAvg += strAvg[i / 4];
-
-                p[i] = currAvg * compressionFactor;
-                p[i + 1] = currAvg * compressionFactor;
-                p[i + 2] = currAvg * compressionFactor;
+            if (outputChannels === 4) { // RGBA
+                result[pixelPosition] = red;
+                result[pixelPosition + 1] = green;
+                result[pixelPosition + 2] = blue;
+                result[pixelPosition + 3] = alpha;
+            } else { // RGB
+                result[pixelPosition] = red;
+                result[pixelPosition + 1] = green;
+                result[pixelPosition + 2] = blue;
             }
         }
 
-        return imageData;
+        if (pixelPosition < pixelLength) {
+            throw new Error('QOI.decode: Incomplete image');
+        }
+
+        // checking the 00000001 padding is not required, as per specs
+
+        return {
+            width: width,
+            height: height,
+            colorspace: colorspace,
+            channels: outputChannels,
+            data: result
+        };
     }
 }

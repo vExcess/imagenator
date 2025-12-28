@@ -18,14 +18,26 @@ body {
     margin: auto;
     padding: 20px;
 }
+@media screen and (max-width: 1250px) {
+    .container {
+        flex-direction: column;
+    }
+}
 
 #preview-container {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: 40px;
-    width: 50%;
+    min-width: 50%;
+    width: fit-content;
     border: 2px solid black;
+    padding: 4px;
+}
+
+.controls {
+    width: 50%;
+    max-width: 450px;
 }
 
 .control-group {
